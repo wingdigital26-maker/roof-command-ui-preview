@@ -499,6 +499,6 @@ RCT_AUTH.gate(function start(){
 </script>
 <script>/* offline cache (sw.js): repeat visits and tab switches load from disk on the hosted build. Registered after the first screen is up; ?nosw=1 or localhost removes it. */
 if('serviceWorker' in navigator){ if(/[?&]nosw=1/.test(location.search)||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) /* on the laptop the cache served stale code and re-saved ~39 MB every load (10-17): local always loads fresh */ navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).then(()=>window.caches&&caches.keys().then(ks=>ks.forEach(k=>caches.delete(k)))).catch(()=>{});
-  else addEventListener('load',()=>setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>{ if(RCT_AUTH.ok()) navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}); },{timeout:5000}),1000)); }</script>
+  else addEventListener('load',()=>setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>{ if(RCT_AUTH.ok()) navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}); },{timeout:8000}),6000)); }   /* 11-02: the worker's precache (about 100 files) used to start 1 s after load and competed with the first screen's own downloads; it now waits 6 s */</script>
 </body>
 </html>

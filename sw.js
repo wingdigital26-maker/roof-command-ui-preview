@@ -11,7 +11,7 @@
    - Basemap tiles, glyphs and sprites from tiles.openfreemap.org: cache first, capped.
    Only GET over http(s) is ever cached; POSTs, Range requests, tel:/sms: links and every other host pass straight through.
    To refresh everything for every visitor: bump CACHE_VERSION. To switch it off for one browser: open any tour page with ?nosw=1. */
-const CACHE_VERSION = 'rc-tour-v21-load-d1793678559';   // 11-02: app rules look, preload, skeletons
+const CACHE_VERSION = 'rc-tour-v22-datacache-d1793679117';   // 11-02: app rules look, preload, skeletons
 const SHELL = CACHE_VERSION + '-shell';
 const DATA = CACHE_VERSION + '-data';
 const TILES = CACHE_VERSION + '-tiles';
@@ -115,7 +115,12 @@ self.addEventListener('fetch', e => {
   if (/(^|\/)(audit\/|_)|\.py$/.test(path) || url.searchParams.get('nosw') === '1') return;
 
   if (path.startsWith('vendor/') || /\.(woff2?|ttf)$/.test(path)) { e.respondWith(cacheFirst(SHELL, req, { ignoreSearch: true })); return; }
-  if (path.startsWith('lib/st-data-dfw/')) { e.respondWith(staleWhileRevalidate(DATA, req, e)); return; }
+  if (path.startsWith('lib/st-data-dfw/')) {
+    // 11-02 (load time): the big binaries (homes.bin, meta/*.bin, fp/, roof3d/, initials/) only change with a data rebuild,
+    // which bumps CACHE_VERSION; re-validating them on every visit re-downloaded ~4 MB in the background (HAR: homes_meta.bin
+    // twice per session) and starved the page. They are cache-first now; the small json feeds keep stale-while-revalidate.
+    if (/\.json(\?|$)/.test(path)) e.respondWith(staleWhileRevalidate(DATA, req, e)); else e.respondWith(cacheFirst(DATA, req));
+    return; }
   // pages carry their screen params in the query (deck.html?n=3, index.html?home=x): one cached copy per page
   const page = req.mode === 'navigate' || /\.html$/.test(path);
   if (page || /\.(js|css)$/.test(path)) {
