@@ -126,7 +126,7 @@ html[data-rc="today"] .app .head .hello #hdMore{grid-column:2;grid-row:1 / span 
 html[data-rc="today"] .app .head .hello .pgsub{display:block;margin-top:4px;font-size:var(--a-13);line-height:var(--a-lh13);color:var(--a-muted)}
 html[data-rc="today"] .app .head #hdMore,html[data-rc="today"] .app .head .mtog{margin-left:0;vertical-align:0;font-size:var(--a-13);color:var(--a-ink);background:#fff;border-radius:var(--a-r-pill);min-height:36px;padding:0 16px}
 /* overview: hero row then four cards */
-html[data-rc="today"] .ov{display:flex;flex-direction:column;gap:var(--a-gap);padding:var(--a-gap) var(--a-pad) 0;max-width:1240px;width:100%}
+html[data-rc="today"] .ov{display:flex;flex-direction:column;gap:var(--a-gap);padding:var(--a-gap) var(--a-pad) 0;max-width:none;width:100%}   /* Jack 11-02: fill the width, no empty column on the right */
 html[data-rc="today"] .ov[hidden]{display:none}
 html[data-rc="today"] .ov-row1{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr);gap:var(--a-gap);align-items:stretch}
 html[data-rc="today"] .ov-hero,html[data-rc="today"] .ov-panel,html[data-rc="today"] .ov-card{opacity:0;transform:translateY(12px);transition:opacity var(--a-in) var(--a-ease),transform var(--a-in) var(--a-ease)}
@@ -205,7 +205,11 @@ html[data-rc="today"] .ov-bar i{display:block;height:6px;width:0;border-radius:3
 html[data-rc="today"] .ov-f{display:flex;justify-content:space-between;gap:8px;padding-top:12px;border-top:1px solid var(--a-hair);font-size:var(--a-12);line-height:var(--a-lh12);color:var(--a-muted);white-space:nowrap;margin-top:auto}
 html[data-rc="today"] .ov-f span{overflow:hidden;text-overflow:ellipsis;min-width:0}
 /* the working deck (list, home card, map) sits under the overview at a fixed working height */
-html[data-rc="today"] .app .main{height:clamp(560px,calc(100vh - 80px),820px);flex:none;padding:var(--a-sect) var(--a-pad) var(--a-pad);gap:var(--a-gap);max-width:1240px;width:100%}
+html[data-rc="today"] .app .main{height:clamp(560px,calc(100vh - 80px),820px);flex:none;padding:var(--a-sect) var(--a-pad) var(--a-pad);gap:var(--a-gap);max-width:none;width:100%;grid-template-columns:288px minmax(400px,480px) minmax(0,1fr)}   /* the map takes every spare pixel on the right (Jack 11-02) */
+/* the list head: tabs on one row, the count on its own line under them so "50 left today" is never cut */
+html[data-rc="today"] :is(.app,.sheet) .qh{flex-wrap:wrap;row-gap:4px}
+html[data-rc="today"] :is(.app,.sheet) .qh small{white-space:nowrap}
+@media (max-width:1100px){ html[data-rc="today"] .app .qh small{flex:0 0 100%;order:9;padding-left:4px} }
 html[data-rc="today"] :is(.app,.sheet) .queue,html[data-rc="today"] :is(.app,.sheet) .mapwrap,html[data-rc="today"] :is(.app,.sheet) .card.paper{border:0;border-radius:var(--a-r);box-shadow:none;background:#fff}
 html[data-rc="today"] :is(.app,.sheet) .ph{border-radius:var(--a-r) var(--a-r) 0 0}
 html[data-rc="today"] :is(.app,.sheet) .qh{padding:20px var(--a-pad) 8px}
@@ -513,9 +517,32 @@ html[data-rc="crm"] #crm .cstage select{border-radius:var(--a-r-pill)!important}
 /* the pipeline board columns */
 html[data-rc="crm"] .pc,html[data-rc="crm"] .pcols>*{border:0!important;background:#fff!important;border-radius:var(--a-r)!important}
 
-/* the board: six stage columns fit a 1168px frame without a sideways scroll (168 -> 150px columns, 8px gaps) */
-html[data-rc="crm"] .pcol{flex-basis:150px!important;border-radius:16px!important}
-html[data-rc="crm"] .pcols{gap:8px!important}
+/* the board (Jack 11-02 "we messed something up"): the columns were pinned at 150px, so every card wrapped its address and
+   chips and the board left a third of the frame empty. Columns now share the frame (grow to fill, never under 190px);
+   under ~1500px the board scrolls sideways inside the page, which APP-RULES 9 allows for kanban boards. */
+html[data-rc="crm"] .pcol:not(.plane){flex:1 1 190px!important;min-width:190px;border-radius:16px!important}
+html[data-rc="crm"] .pcol.plane{border-radius:16px!important}
+html[data-rc="crm"] .pcol.plane.open{flex-basis:190px!important}
+html[data-rc="crm"] .pcols{gap:12px!important}
+html[data-rc="crm"] .pc .pmeta,html[data-rc="crm"] .pc .phail{white-space:nowrap}   /* "1.4 inches  Mar 25" stays one line */
+html[data-rc="crm"] .pc .pmeta{display:flex;gap:8px;overflow:hidden}
+/* the thread header: the address keeps one line next to the stage select (15px, the select capped at 140px) */
+html[data-rc="crm"] #crm .cvt b{font-size:15px!important;line-height:22px!important;letter-spacing:-.005em!important}
+html[data-rc="crm"] #crm .cvt small{font-size:12px!important;line-height:16px!important}
+html[data-rc="crm"] #crm .cvh .cstage select{max-width:140px;height:36px}
+html[data-rc="crm"] #crm .cico,html[data-rc="crm"] #crm .cmenu summary{width:36px;height:36px;padding:0;margin:0;max-width:none}
+/* the home pane while a thread is open: the house from above (the 3D stage went with the 11-01 port, which left the pane empty) */
+html[data-rc="crm"] #crm .cphoto{position:relative;margin:0 0 14px;border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:#e8eaee}
+html[data-rc="crm"] #crm .cphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+html[data-rc="crm"] #crm .cphoto .cr{position:absolute;right:8px;bottom:6px;max-width:70%;font-size:9.5px;line-height:1.25;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);text-align:right}
+html[data-rc="crm"] #crm .cphoto .tag{position:absolute;left:10px;top:10px;background:var(--a-blue);color:#fff;font-size:12px;line-height:16px;font-weight:500;padding:4px 10px;border-radius:999px}
+/* the house page: the next task beside the photo (the record's own task card, mirrored; its buttons press the record's) */
+html[data-rc="crm"] #house .hcard[data-sec="next"] .due{font-size:12px;line-height:16px;color:var(--a-muted);margin:0}
+html[data-rc="crm"] #house .hcard[data-sec="next"] h3{font-size:15px;line-height:22px;font-weight:600;letter-spacing:-.005em;margin:6px 0 0}
+html[data-rc="crm"] #house .hcard[data-sec="next"] p.why{font-size:13px;line-height:18px;color:var(--a-muted);margin:6px 0 0}
+html[data-rc="crm"] #house .hcard[data-sec="next"] .row{display:flex;gap:8px;margin-top:14px}
+html[data-rc="crm"] #house .hcard[data-sec="next"] .row button{flex:1;min-height:36px;border:0;border-radius:999px;font:500 13px/18px var(--a-font);background:var(--a-canvas);color:var(--a-ink);cursor:pointer}
+html[data-rc="crm"] #house .hcard[data-sec="next"] .row button:first-child{background:var(--a-dark,#111318);color:#fff}
 
 /* =========================================================== FIND (c10-find) =========================================================== */
 html[data-rc="find"] .wrap{padding:var(--a-pad) var(--a-pad) 110px}

@@ -28,6 +28,21 @@
     return `<div class="hf"${fk ? ` data-f="${fk}"` : ''}><dt>${esc(label)}</dt><dd>${value}</dd>${src ? `<small>${esc(src)}</small>` : ''}</div>`;
   }
 
+  // the record's next task (rec.js renderNext into #next, hidden with the old page) shows beside the photo; Done and Book
+  // press the record's own buttons, so nothing new is written here. The 11-01 port dropped it and left the column empty.
+  function mirrorNext() {
+    const src = document.getElementById('next'), card = $('#hNextCard', root), box = $('#hNext', root);
+    if (!src || !card || !box) return;
+    const h4 = src.querySelector('h4'), why = src.querySelector('.why'), due = src.querySelector('.due');
+    if (!h4) { card.hidden = true; return; }
+    const btns = [...src.querySelectorAll('.row button')];
+    box.innerHTML = `<p class="due">${esc(due ? due.textContent.trim() : '')}</p><h3>${h4.innerHTML}</h3>${why ? `<p class="why">${why.innerHTML}</p>` : ''}` +
+      (btns.length ? `<div class="row">${btns.map((b, i) => `<button type="button" data-i="${i}">${esc(b.textContent.trim())}</button>`).join('')}</div>` : '');
+    box.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const t = src.querySelectorAll('.row button')[+b.dataset.i]; if (t) t.click(); });
+    card.hidden = false;
+  }
+  (function watchNext() { const src = document.getElementById('next'); if (!src) return; new MutationObserver(() => { if (root.isConnected && $('#hNext', root)) mirrorNext(); }).observe(src, { childList: true, subtree: true, characterData: true }); })();
+
   function render() {
     const H = window.HOME; if (!H || !H.rec) return;
     const r = H.rec, gi = r.gi != null ? +r.gi : +String(H.id).slice(1), id = H.id;
@@ -63,6 +78,10 @@
             <p class="own" id="hOwn">Loading</p>
             <p class="own-s" id="hOwnS"></p>
           </section>
+          <section class="hcard" data-sec="next" id="hNextCard" hidden>
+            <h2>Next task</h2>
+            <div id="hNext"></div>
+          </section>
           <section class="hcard" data-sec="stage">
             <h2>Where this lead is</h2>
             <div class="stg" role="group" aria-label="Stage">${RC.STAGES.map(s => `<button type="button" data-st="${esc(s[0])}" aria-pressed="${s[0] === stage}">${esc(s[1])}</button>`).join('')}</div>
@@ -81,6 +100,7 @@
       <section class="hstorm" id="hStorm"><h2>Hail at this house</h2><p class="none">Loading the radar record</p></section>`;
 
     root.querySelectorAll('[data-h]').forEach(b => b.onclick = () => press(b.dataset.h));
+    mirrorNext();
     root.querySelectorAll('[data-st]').forEach(b => b.onclick = () => {
       if (b.dataset.st === stage) return;
       RC.setStage(id, b.dataset.st, 'Stage set to ' + RC.stageName(b.dataset.st)); render();

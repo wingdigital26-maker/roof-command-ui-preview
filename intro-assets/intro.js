@@ -88,6 +88,10 @@
   function showBeat(name){
     if(ended) return;
     docEl.classList.add('beat-on');
+    /* 11-02: once the headline has faded, take it out of flow and ask the piece engine to refit, so the piece centres in the
+       free band above the beat at every window size (it used to keep the hero fit: above the headline at 1280x720, on top of
+       the greeting at 1440x900) */
+    if(!docEl.classList.contains('beat-fit')) setTimeout(function(){ docEl.classList.add('beat-fit'); try{ window.dispatchEvent(new Event('resize')); }catch(e){} }, 450);
     var el = document.getElementById('beat-'+name);
     if(current && current !== el){ current.classList.remove('in'); current.classList.add('out'); }
     current = el;
@@ -141,6 +145,7 @@
   function end(){
     if(ended) return; ended = true;
     clearTimeout(cueT); clearTimeout(stillT); docEl.classList.remove('loading'); docEl.classList.remove('skip-on');
+    if(window.parent === window) docEl.classList.add('solo');   // the fade-out is for the standalone page; in the shell Today rises over the still-painted opening
     document.body.classList.add('go');
     try{ sessionStorage.setItem('rc.introSeen', '1'); }catch(e){}
     try{ window.parent.postMessage({type:'intro-done'}, '*'); }catch(e){}

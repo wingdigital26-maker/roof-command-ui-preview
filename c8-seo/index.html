@@ -79,6 +79,33 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../lib/rc-apprules.css"><!-- app rules (11-02) -->
+<style>
+/* 11-02 (Jack: "add some color to this page"): colour that carries meaning only. Icon tiles cycle the four app tones
+   (APP-RULES 3), the type pill says blog or service page, the cadence bars show how many pages went live each month. */
+.sum div{display:grid;grid-template-columns:40px minmax(0,1fr);gap:0 14px;align-items:center}
+.sum .tile{grid-row:1 / span 2;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff}
+.sum .tile svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sum div:nth-child(4n+1) .tile{background:#1d5cf0}.sum div:nth-child(4n+2) .tile{background:#1b2a5c}.sum div:nth-child(4n+3) .tile{background:#4f8dff}.sum div:nth-child(4n+4) .tile{background:#111318}
+.sum b{grid-column:2}.sum span{grid-column:2;text-transform:none!important;letter-spacing:0!important;font-size:12px!important}
+.cad{display:flex;align-items:flex-end;gap:14px;padding:16px 24px 18px;border-bottom:1px solid var(--line-2)}
+.cad .lab{flex:0 0 150px;font-size:12px;line-height:16px;color:var(--slate);align-self:center}
+.cad .lab b{display:block;font-size:15px;line-height:22px;color:var(--ink);font-weight:600;letter-spacing:-.005em}
+.cad ol{list-style:none;margin:0;padding:0;display:flex;gap:10px;flex:1;align-items:flex-end;height:64px}
+.cad li{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;height:100%;justify-content:flex-end}
+.cad li i{display:block;width:100%;max-width:56px;border-radius:6px 6px 2px 2px;background:#4f8dff;min-height:2px;transition:height .7s cubic-bezier(.22,1,.36,1)}
+.cad li.now i{background:#1d5cf0}
+.cad li.zero i{background:#e8eaee}
+.cad li small{font-size:12px;line-height:16px;color:var(--slate);white-space:nowrap}
+.cad li em{font-style:normal;font-size:12px;line-height:16px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.cad li.zero em{color:var(--slate);font-weight:400}
+.row .ty{justify-self:start;display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap}
+.row .ty.blog{background:#eef3ff;color:#1d5cf0}
+.row .ty.service{background:#e9edf7;color:#1b2a5c}
+.row .k.none{color:#a0a4ab}
+.row .m .ty{height:20px;padding:0 8px;margin-right:4px}
+@media (max-width:899px){ .cad{padding:14px 16px} .cad .lab{flex-basis:110px} .cad li:nth-child(-n+2){display:none} }
+@media (max-width:599px){ .cad{flex-direction:column;align-items:stretch;gap:10px} .cad .lab{flex-basis:auto} .cad li:nth-child(-n+2){display:flex} .row .m .ty{display:inline-flex} }
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -88,6 +115,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
       <p id="sub">Every blog post and service page Wing has published on your website.</p>
     </div>
     <div class="sum" id="sum"></div>
+    <div class="cad" id="cad" hidden aria-label="Pages published per month"></div>
     <div class="tools">
       <div class="seg" role="group" aria-label="Show">
         <button type="button" data-f="all" class="on" aria-pressed="true">All</button>
@@ -122,10 +150,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
       const g=i.gsc?` · ${i.gsc.clicks} clicks`:'';
       return `<li><div class="row">
         <a class="t" href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.title)}</a>
-        <span class="ty">${TYPE[i.type]}</span>
-        <span class="k">${esc(i.keyword)}</span>
+        <span class="ty ${esc(i.type)}">${TYPE[i.type]}</span>
+        <span class="k${i.keyword?'':' none'}">${i.keyword?esc(i.keyword):'No keyword set'}</span>
         <span class="d">${day(i.date)}</span>
-        <span class="m">${TYPE[i.type]} · ${day(i.date)}${i.keyword?` · ${esc(i.keyword)}`:''}${g}</span>
+        <span class="m"><span class="ty ${esc(i.type)}">${TYPE[i.type]}</span> ${day(i.date)}${i.keyword?` · ${esc(i.keyword)}`:''}${g}</span>
         <a class="op" href="${esc(i.url)}" target="_blank" rel="noopener" aria-label="Open ${esc(i.title)} on your website">${ICON}<span class="w">Open page</span></a>
       </div></li>`;}).join('');
   }
@@ -136,7 +164,15 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
     $('sub').innerHTML=`Every blog post and service page Wing has published on your website, <a href="${esc(d.site)}" target="_blank" rel="noopener">${esc(host)}</a>.`;
     const tiles=[[c.total,'Pages published'],[c.blog,'Blog posts'],[c.service,'Service pages'],[c.this_month,'Published in '+LONG[now.getMonth()]]];
     if(d.gsc&&c.clicks!=null) tiles.push([c.clicks,'Clicks from Google']);
-    $('sum').innerHTML=tiles.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('');
+    const TI=['<path d="M4 2.5h7l5 5V17.5H4zM11 2.5v5h5"/><path d="M7 11h6M7 14h6"/>','<path d="M4 16l1-4L14.5 2.5l3 3L8 15z"/><path d="M12.5 4.5l3 3"/>','<path d="M14.5 3.5a3.5 3.5 0 0 0-4.6 4.6L3.5 14.5l2 2 6.4-6.4a3.5 3.5 0 0 0 4.6-4.6l-2.2 2.2-1.6-1.6z"/>','<rect x="3" y="4.5" width="14" height="13" rx="2"/><path d="M3 9h14M7 2.5v4M13 2.5v4"/>','<path d="M3 15l5-5 4 4 5-7"/><path d="M13 7h4v4"/>'];
+    $('sum').innerHTML=tiles.map(([v,l],i)=>`<div><span class="tile" aria-hidden="true"><svg viewBox="0 0 20 20">${TI[i%TI.length]}</svg></span><b>${v}</b><span>${l}</span></div>`).join('');
+    // cadence: pages that went live in each of the last 6 months (from the real dates in the list), the current month in the primary blue
+    const months=[]; for(let k=5;k>=0;k--){ const t=new Date(now.getFullYear(),now.getMonth()-k,1); months.push({y:t.getFullYear(),m:t.getMonth(),n:0}); }
+    d.items.forEach(i=>{ const [y,m]=String(i.date).split('-').map(Number); const b=months.find(x=>x.y===y&&x.m===m-1); if(b) b.n++; });
+    const mx=Math.max(1,...months.map(x=>x.n)), six=months.reduce((a,x)=>a+x.n,0);
+    const cad=$('cad'); cad.hidden=false;
+    cad.innerHTML=`<div class="lab"><b>${six} in six months</b>Pages that went live, by month</div><ol>${months.map((x,i)=>`<li class="${x.n?'':'zero '}${i===5?'now':''}"><em>${x.n}</em><i style="height:0" data-h="${Math.round(x.n/mx*40)+2}"></i><small>${MON[x.m]}</small></li>`).join('')}</ol>`;
+    requestAnimationFrame(()=>cad.querySelectorAll('i[data-h]').forEach(b=>{ b.style.height=b.dataset.h+'px'; }));
     if(d.next&&d.next.length){ $('nx').hidden=false; $('nxl').innerHTML=d.next.map(n=>`<li><b>${esc(n.title)}</b><span>${esc(n.keyword)}</span></li>`).join(''); }
     $('foot').textContent=`Updated ${day(d.generated.slice(0,10))} from your live website.`;
     draw();

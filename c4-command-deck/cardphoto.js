@@ -26,7 +26,7 @@ html.cardphoto .ph .rlink{z-index:2}
     const ph = card.querySelector('.ph'); if (!ph || ph.querySelector('.phot')) return;
     const h = homeOf(card.dataset.id); if (!h || !h.loc) return;
     const r = ph.getBoundingClientRect(), w = Math.max(240, r.width || 480), hh = Math.max(120, r.height || 240);
-    const hy = 24, hx = hy * w / hh;   // about 48 m of ground top to bottom: the whole house and its yard
+    const hy = 13, hx = hy * w / hh;   // about 26 m of ground top to bottom: THIS house, roof filling the band (Jack 11-02: "I want the view of the house")
     const p = RCIMG.photo(h.loc[0], h.loc[1], hx, hy);
     const img = document.createElement('img'); img.className = 'phot'; img.alt = 'The roof from above'; img.decoding = 'async'; img.loading = 'lazy';
     img.src = p.src; if (p.fallback) img.onerror = () => { img.onerror = null; img.src = p.fallback; cr.textContent = RCIMG.NAIP_CREDIT; };

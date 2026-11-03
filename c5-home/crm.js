@@ -314,7 +314,8 @@
     const rr = mine && H.rec && H.rec.reroof, permit = rr ? (rr.none ? 'No re-roof permit since ' + rr.since : (rr.done ? 'Re-roofed ' : 'Re-roof permit ') + rr.date) : '';
     const strip = RC.STAGES.map((s, i) => `<button type="button" class="cst${i < idx ? ' dn' : ''}${i === idx && !arch ? ' on' : ''}" data-s="${s[0]}" aria-current="${i === idx ? 'step' : 'false'}"><span class="d">${i < idx ? ICON.check : i + 1}</span><b>${esc(s[1])}</b></button>`).join('');
     // 10-17: the few facts a roofer needs while texting (hail, roof), Book, then the rest behind More
-    const facts = `<div class="cstg-row"><span>Stage</span>${stageSelect(id)}</div><div class="ckpi">` +   // the stage row shows on the phone sheet, where the thread header has no room for it
+    const facts = (h.gi != null && window.RCIMG && window.STM ? `<figure class="cphoto" data-gi="${h.gi}" aria-label="Satellite photo of ${esc(h.addr)}"><span class="tag">This house</span></figure>` : '') +   // 11-02: the house from above (lib/rc-imagery.js, Esri live, NAIP fallback, credit shown)
+      `<div class="cstg-row"><span>Stage</span>${stageSelect(id)}</div><div class="ckpi">` +   // the stage row shows on the phone sheet, where the thread header has no room for it
       `<div><span>Hail</span>${h.hail != null ? `<b>${h.hail.toFixed(2)} in</b><small>${esc(h.hailDate)}</small>` : '<b class="sm">Not on file</b>'}</div>` +
       `<div><span>Roof</span>${h.year ? `<b>${esc(String(h.year))}</b><small>${esc(permit)}</small>` : `<b class="sm">${esc(roof)}</b><small>${esc(permit)}</small>`}</div>` +
       `</div>` +   // 11-01: roof squares were an estimate; the panel shows only facts on file
@@ -327,7 +328,18 @@
       `<div class="cstrip" role="group" aria-label="Stage">${strip}</div>${arch ? '<p class="cnote">Parked in Not now on the Pipeline.</p>' : ''}` +
       (/^m\d+$/.test(id) ? `<button type="button" class="cbtn wide" data-a="hailrep"><span class="ic">${ICON.doc}</span>Storm report for the homeowner</button>` : '') +
       `<button type="button" class="cbtn wide" data-a="record"><span class="ic">${ICON.roof}</span>Open the home record</button></details>`;
-    if (chf.__h !== facts) { chf.innerHTML = facts; chf.__h = facts; }
+    if (chf.__h !== facts) { chf.innerHTML = facts; chf.__h = facts; panePhoto(chf.querySelector('.cphoto')); }
+  }
+  // the pane's satellite photo: about 40 m across at the home's county position, one request per home, kept while the page lives
+  const PHOTO = new Map();
+  function panePhoto(fig) {
+    if (!fig) return; const gi = +fig.dataset.gi;
+    const put = p => { if (!fig.isConnected) return; const img = document.createElement('img'); img.alt = ''; img.decoding = 'async'; img.src = p.src;
+      const cr = document.createElement('span'); cr.className = 'cr'; cr.textContent = p.credit;
+      if (p.fallback) img.onerror = () => { img.onerror = null; img.src = p.fallback; cr.textContent = RCIMG.NAIP_CREDIT; };
+      fig.prepend(img); fig.append(cr); };
+    if (PHOTO.has(gi)) { put(PHOTO.get(gi)); return; }
+    STM.lonlat(gi).then(ll => { if (!ll || !isFinite(ll[0])) return; const p = RCIMG.photo(ll[0], ll[1], 20, 12.5); PHOTO.set(gi, p); put(p); }).catch(() => { });
   }
   // the one 3D stage lives in the home pane while a thread is open, else in the record
   function placeStage() {

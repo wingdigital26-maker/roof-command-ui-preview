@@ -50,9 +50,40 @@ main{flex:1;display:flex;justify-content:center;align-items:center;padding:12px 
 .stage{position:relative;width:100%;height:100%;border-radius:14px;background:#fff;box-shadow:0 10px 40px rgba(11,16,32,.12);transition:width .3s ease,border-radius .3s ease;overflow:hidden}
 .frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;opacity:0;transform:translateY(16px);visibility:hidden;pointer-events:none;
   transition:opacity .4s ease-out,transform .4s ease-out,visibility 0s linear .4s}
-.frame.on{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition-delay:0s}
-.frame.out{opacity:0;transform:none;visibility:visible;transition:opacity .3s ease-out,visibility 0s linear .3s}
+.frame.on{opacity:1;transform:none;visibility:visible;pointer-events:auto;transition-delay:0s;z-index:2}
+/* the outgoing screen stays painted under the incoming one (z-index 1) and only fades once the new screen is in, so the
+   stage grey never shows through the cross-fade (Jack 11-02: a blank grey frame at the opening's handoff) */
+.frame.out{opacity:0;transform:none;visibility:visible;z-index:1;transition:opacity .25s ease-out .4s,visibility 0s linear .65s}
 .frame.parked{display:none}   /* parked frames keep their document and state but stop painting */
+/* APP-RULES 10 (Jack 11-02): a screen that is still loading shows its real layout as a skeleton, never a blank. The skeleton
+   sits over the stage, in the canvas grey with white blocks where the screen's cards land, and fades once the frame has
+   painted real content (the shell polls the frame: text in the panel, the map drawn, the hero up). */
+.skel{position:absolute;inset:0;z-index:5;background:#f1f2f4;padding:24px;display:none;pointer-events:none;opacity:1;transition:opacity .2s ease-out}
+.skel.show{display:block}
+.skel.fade{opacity:0}
+.skel i{display:block;background:#fff;border-radius:24px;animation:skpulse 1.4s ease-in-out infinite}
+.skel i.t{background:#e4e6ea;border-radius:8px;height:14px;animation-delay:.2s}
+.skel i.d{background:#dfe1e5}
+.skel .r{display:grid;gap:20px;margin-bottom:20px}
+.skel[data-for="today"] .h{height:28px;width:120px;margin-bottom:8px}.skel[data-for="today"] .s{height:14px;width:260px;margin-bottom:20px}
+.skel[data-for="today"] .r1{grid-template-columns:minmax(0,1.7fr) minmax(300px,1fr)}.skel[data-for="today"] .r1 i{height:250px}
+.skel[data-for="today"] .r2{grid-template-columns:repeat(4,minmax(0,1fr))}.skel[data-for="today"] .r2 i{height:210px}
+.skel[data-for="today"] .r3{grid-template-columns:288px minmax(400px,480px) minmax(0,1fr)}.skel[data-for="today"] .r3 i{height:420px}
+.skel[data-for="storm"]{padding:0}.skel[data-for="storm"] .map{position:absolute;inset:0;background:#e9ebee;border-radius:0;animation:none}
+.skel[data-for="storm"] .bar{position:absolute;left:16px;right:16px;top:14px;height:44px;border-radius:999px}
+.skel[data-for="storm"] .box{position:absolute;left:16px;top:72px;width:318px;height:64px;border-radius:16px}
+.skel[data-for="storm"] .pill{position:absolute;right:16px;bottom:16px;width:160px;height:36px;border-radius:999px}
+.skel[data-for="home"] .tabs{height:44px;width:600px;border-radius:999px;margin-bottom:20px}
+.skel[data-for="home"] .r1{grid-template-columns:340px minmax(0,1fr) 360px}.skel[data-for="home"] .r1 i{height:calc(100vh - 150px);min-height:420px}
+.skel[data-for="find"] .h{height:28px;width:160px;margin-bottom:8px}.skel[data-for="find"] .s{height:14px;width:320px;margin-bottom:20px}
+.skel[data-for="find"] .r1{grid-template-columns:340px minmax(0,1fr)}.skel[data-for="find"] .r1 i{height:calc(100vh - 170px);min-height:400px}
+.skel[data-for="seo"] .hd,.skel[data-for="results"] .hd{height:88px;border-radius:24px 24px 0 0;margin-bottom:1px}
+.skel[data-for="seo"] .r1,.skel[data-for="results"] .r1{grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-bottom:1px}.skel[data-for="seo"] .r1 i,.skel[data-for="results"] .r1 i{height:110px;border-radius:0}
+.skel[data-for="seo"] .rows{height:calc(100vh - 290px);min-height:260px;border-radius:0 0 24px 24px}
+.skel[data-for="results"] .r2{grid-template-columns:repeat(2,minmax(0,1fr))}.skel[data-for="results"] .r2 i{height:300px}
+@keyframes skpulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media (max-width:939px){.skel[data-for="today"] .r1,.skel[data-for="home"] .r1,.skel[data-for="find"] .r1{grid-template-columns:minmax(0,1fr)}.skel[data-for="today"] .r2{grid-template-columns:repeat(2,minmax(0,1fr))}.skel[data-for="today"] .r3{display:none}.skel[data-for="home"] .tabs{width:100%}}
+@media (prefers-reduced-motion:reduce){.skel i{animation:none}.skel{transition:none}}
 main.phone .stage{width:390px;height:min(844px,100%);border-radius:28px}
 @media (prefers-reduced-motion:reduce){.frame,.frame.out,.stage{transition:none}}
 @media (max-width:1180px){.sig{display:none}.find{width:170px}}
@@ -103,7 +134,7 @@ html[data-rc] body[data-screen="daily"]>header .wstorm{display:none}
   <div class="sig">Powered by <svg viewBox="0 0 63 66" aria-hidden="true"><path fill="#2757E6" d="M 0 3 Q 0 0 3 0 L 27 0 Q 30.5 0 30.5 3.5 L 30.5 28.5 Q 30.5 33.5 35.5 33.5 L 60 33.5 Q 63 33.5 63 36.5 L 63 63 Q 63 66 60 66 L 36 66 Q 32.5 66 32.5 62.5 L 32.5 37.5 Q 32.5 32.5 27.5 32.5 L 3 32.5 Q 0 32.5 0 29.5 Z"/></svg><b>Wing Digital</b></div>
   <div class="sb-user"><div class="me" id="me" title="" tabindex="0"></div><div class="sb-who"><b id="sbName"></b><small id="sbRole">Account and setup</small></div></div>
 </header>
-<main id="main"><div class="stage" id="f"></div></main>
+<main id="main"><div class="stage" id="f"><div class="skel" id="skel" aria-hidden="true"></div></div></main>
 <script src="lib/rc-state.js"></script><script src="lib/rc-layout.js"></script>
 <script src="lib/brand.js"></script>
 <script src="lib/wing-mascot.js"></script>
@@ -146,7 +177,11 @@ const ss={get(k){try{return sessionStorage.getItem(k)}catch(e){return null}},set
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let cur=null,briefed=false;
 const frames={};            // screen -> {el, src, loaded}
-const PREFETCH={daily:'home',storm:'daily',home:'daily'};
+window.__frames=frames;     // the nav-time check reads which screens are warm
+/* APP-RULES 10 (Jack 11-02, "make it so this stuff preloads"): after the first screen is usable every other screen loads in the
+   background, lightest first, heavy maps last, each on an idle slot after the one before it; frames stay alive and parked
+   (rc-frame-pause.js stops their drawing), so a nav click shows the screen at once. Not under the opening: after it. */
+const WARM_ORDER=['daily','seo','results','find','home','storm'];
 window.__switch={last:0};   // tab-switch timing for the Playwright check
 
 /* ---- routes ---- */
@@ -212,7 +247,7 @@ function frameFor(screen){
   /* Escape pressed while a screen has focus (nearly always): the frame's own dialogs and popovers eat it first; what is
      left reaches the shell, so the Nimbus panel and the update bubble close like they do when the shell has focus (10-15) */
   el.addEventListener('load',()=>{ try{ el.contentWindow.addEventListener('keydown',e=>{ if(e.key==='Escape') window.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'})); if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){ e.preventDefault(); e.stopImmediatePropagation(); RCFind.open(); } },true);   /* Ctrl K inside any screen opens the one header search */ }catch(e){} });
-  el.addEventListener('load',()=>{ fr.loaded=true; if(cur===screen){ window.__switch.last=Math.round(performance.now()-(window.__switch.t0||performance.now())); settle(screen); }
+  el.addEventListener('load',()=>{ fr.loaded=true; fr.textAt=0; if(cur===screen){ window.__switch.last=Math.round(performance.now()-(window.__switch.t0||performance.now())); settle(screen); }
     else if(!fr.held) setTimeout(()=>{ if(cur!==screen&&!fr.held){ el.classList.add('parked'); tell(fr,{type:'visibility',hidden:true}); } },2500); });   // a prefetched frame sizes itself first, then parks (a held frame keeps painting under the opening)
   return fr;
 }
@@ -253,10 +288,12 @@ function render(){
   else if(screen==='opening'&&fr.loaded&&!quiet) load(fr,src);   // the opening replays from the top
   /* website-style transition: outgoing fades, incoming rises 16 px */
   if(prev&&prev!==screen&&frames[prev]){ const o=frames[prev].el; o.classList.remove('on'); o.classList.add('out'); tell(frames[prev],{type:'visibility',hidden:true});
-    setTimeout(()=>{ o.classList.remove('out'); if(cur!==prev) o.classList.add('parked'); },reduced?0:320); }
+    setTimeout(()=>{ o.classList.remove('out'); if(cur!==prev) o.classList.add('parked'); },reduced?0:680); }
   Object.keys(frames).forEach(k=>{ if(k!==screen){ frames[k].el.classList.remove('on'); if(k!==prev&&!frames[k].held) frames[k].el.classList.add('parked'); } });
   if(fr.held){ fr.held=false; delete fr.el.dataset.hold; }   // the frame that loaded under the opening is now the screen
   fr.el.classList.remove('parked'); void fr.el.offsetWidth; fr.el.classList.add('on');   // reflow first so a brand-new frame still rises in
+  if(fr.warm){ fr.warm=false; delete fr.el.dataset.warm; }
+  if(screen==='opening') skelHide(); else skelShow(screen);
   tell(fr,{type:'visibility',hidden:false});
   if(fr.loaded&&src===fr.src){ window.__switch.last=Math.round(performance.now()-(window.__switch.t0||performance.now())); settle(screen); }
 }
@@ -272,18 +309,63 @@ function tell(fr,msg){ try{ fr.el.contentWindow.postMessage(msg,location.origin)
 function settle(screen){
   if(pendingBrief&&screen==='daily') sayBrief();
   if(pendingFind&&screen===findTarget()){ const m=pendingFind; pendingFind=null; setTimeout(()=>tell(frames[screen],m),250); }
-  const next=PREFETCH[screen]; if(NOPREFETCH||!next||frames[next]) return;
-  /* Today first: the CRM prefetch (three.js + a 3D roof) used to start 1.5 s after the Today frame loaded, while its map was
-     still drawing; on a slow GPU that starved the map. Now it waits until Today's map is ready (or 12 s), then for idle. */
-  const mapDone=()=>{ if(screen!=='daily') return true; try{ const w=frames[screen].el.contentWindow; return !!(w&&w.__mapReady); }catch(e){ return true; } };
-  const t0=performance.now();
-  const tryPrefetch=()=>{ if(cur!==screen||frames[next]) return; if(!mapDone()&&performance.now()-t0<12000){ setTimeout(tryPrefetch,500); return; }
-    idle(()=>{ if(cur!==screen||frames[next]) return; const fr=frameFor(next); load(fr,srcFor(next,{})); }); };
-  /* Today's first reveal draws the fan of lines for about 6 s: the CRM prefetch (three.js) waits until that is over */
+  if(NOPREFETCH||LOADING.on) return;
+  /* Today's first reveal draws the fan of lines for about 6 s and its map tiles land after that: the queue waits for the
+     map (or 12 s), then for an idle slot, before the first background screen. Later screens follow 1.2 s after each load. */
   const first=screen==='daily'&&!frames[screen].warmed; frames[screen].warmed=true;
-  setTimeout(tryPrefetch,first?6500:1500);
+  setTimeout(()=>warmNext(screen),first?6500:1200);
 }
-const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:4000}):setTimeout(f,0);
+let warming=null;   // the screen loading in the background right now
+function warmNext(from){
+  if(NOPREFETCH||LOADING.on||warming) return;
+  const next=WARM_ORDER.find(k=>!frames[k]); if(!next) return;
+  /* only the first background screen waits for Today's map (up to 12 s); after that the queue just takes idle slots */
+  const mapDone=()=>{ if(warmNext.any) return true; const d=frames.daily; if(!d||!d.loaded) return true; try{ const w=d.el.contentWindow; return !!(w&&w.__mapReady); }catch(e){ return true; } };
+  const t0=performance.now();
+  const tryIt=()=>{ if(frames[next]){ warming=null; warmNext(); return; } if(!mapDone()&&performance.now()-t0<12000){ setTimeout(tryIt,500); return; }
+    idle(()=>{ if(frames[next]){ warming=null; warmNext(); return; } warming=next; warmNext.any=true; const fr=frameFor(next); fr.warm=true; fr.el.dataset.warm='1';
+      /* held like a screen under the opening (opacity 0, never display:none) until its first view has drawn, so a map
+         can size its canvas and finish its first draw off-screen; then it parks (rc-frame-pause stops its drawing) */
+      fr.held=true; fr.el.dataset.hold='1'; load(fr,srcFor(next,{}));
+      const cap=next==='storm'?30000:next==='home'?12000:6000, t1=performance.now();
+      const drawn=()=>{ try{ const w=fr.el.contentWindow; if(!w||!fr.loaded) return false; if(next==='storm'||next==='home') return !!w.__ready; return w.document.readyState==='complete'; }catch(e){ return true; } };
+      const park=()=>{ if(!fr.held) return; fr.held=false; delete fr.el.dataset.hold; if(cur!==next){ fr.el.classList.add('parked'); tell(fr,{type:'visibility',hidden:true}); } };
+      const done=()=>{ if(warming!==next) return; warming=null; setTimeout(()=>warmNext(),800); };
+      const watch=()=>{ if(!fr.held){ done(); return; } if(drawn()||performance.now()-t1>cap){ setTimeout(park,next==='storm'||next==='home'?800:300); done(); return; } setTimeout(watch,250); };
+      fr.el.addEventListener('load',()=>setTimeout(watch,300),{once:true}); setTimeout(()=>{ if(warming===next){ park(); done(); } },cap+5000);   // a screen that never arrives does not block the rest
+    }); };
+  tryIt();
+}
+/* the skeleton: shown over the stage while the current screen has no painted content; hidden the moment it has */
+const skel=document.getElementById('skel');
+const SKEL={today:'<i class="t h"></i><i class="t s"></i><div class="r r1"><i class="d"></i><i></i></div><div class="r r2"><i></i><i></i><i></i><i></i></div><div class="r r3"><i></i><i></i><i></i></div>',
+  storm:'<i class="map"></i><i class="bar"></i><i class="box"></i><i class="pill"></i>',
+  home:'<i class="tabs"></i><div class="r r1"><i></i><i></i><i></i></div>',
+  find:'<i class="t h"></i><i class="t s"></i><div class="r r1"><i></i><i></i></div>',
+  seo:'<i class="hd"></i><div class="r r1"><i></i><i></i><i></i><i></i></div><i class="rows"></i>',
+  results:'<i class="hd"></i><div class="r r1"><i></i><i></i><i></i><i></i></div><div class="r r2"><i></i><i></i></div>'};
+const SKEL_FOR={daily:'today',storm:'storm',home:'home',find:'find',seo:'seo',results:'results'};
+let skelPoll=0,skelFor=null;
+function painted(screen){
+  const fr=frames[screen]; if(!fr||!fr.loaded) return false;
+  let d,w; try{ d=fr.el.contentDocument; w=fr.el.contentWindow; }catch(e){ return true; }
+  if(!d||!d.body) return false;
+  const txt=(d.body.innerText||'').trim().length;
+  if(screen==='daily') return !!d.querySelector('.ov-hero h1, .ov-hero .big, #deck .card .addr h2')||!!w.__mapReady;
+  if(screen==='storm'){ const m=d.querySelector('#pmini, #stat .head'); const text=!!(m&&m.textContent.trim().length>5)&&txt>40; if(w.__ready) return true; if(text){ fr.textAt=fr.textAt||performance.now(); return performance.now()-fr.textAt>1200; } return false; }
+  if(screen==='home'){ const c=d.querySelector('#crm .cl, .pipe, #house, .cal, .pc'); return !!(c&&c.offsetHeight>0)&&txt>50; }
+  return d.readyState==='complete'&&txt>50;
+}
+function skelShow(screen){
+  const kind=SKEL_FOR[screen]; if(!kind){ skelHide(); return; }
+  if(painted(screen)){ skelHide(); return; }
+  if(skelFor!==kind){ skel.dataset.for=kind; skel.innerHTML=SKEL[kind]; skelFor=kind; }
+  skel.classList.remove('fade'); skel.classList.add('show'); window.__skelAt=performance.now();
+  clearInterval(skelPoll); const t0=performance.now();
+  skelPoll=setInterval(()=>{ if(cur!==screen){ clearInterval(skelPoll); return; } if(painted(screen)||performance.now()-t0>25000) skelHide(); },50);
+}
+function skelHide(){ clearInterval(skelPoll); if(!skel.classList.contains('show')) return; skel.classList.add('fade'); setTimeout(()=>{ if(skel.classList.contains('fade')){ skel.classList.remove('show','fade'); } },reduced?0:200); }
+const idle=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:2500}):setTimeout(f,0);
 addEventListener('hashchange',render);
 
 /* the opening hands off on its own to Today, then Nimbus gives the morning brief */
@@ -300,6 +382,7 @@ function onIntroDone(){
   ss.set('rc.introSeen','1');
   clearTimeout(LOADING.cap); LOADING.on=false; LOADING.hand=Math.round(performance.now()-LOADING.t0); window.__handAbs=performance.timeOrigin+performance.now();
   go('daily',{},true); parkWarm();
+  if(frames.daily&&frames.daily.loaded) settle('daily');   // the warm queue (seo, results, find, CRM, Storms) starts now, never under the opening
   if(!Nimbus.isArrived()) Nimbus.arrive(null);
   if(!briefed){ briefed=true; const fr=frames.daily; if(fr&&fr.loaded) sayBrief(); else pendingBrief=true; }   // the brief states the real queue, so it waits for the Daily 50
 }
