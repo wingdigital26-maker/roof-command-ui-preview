@@ -11,7 +11,7 @@
    - Basemap tiles, glyphs and sprites from tiles.openfreemap.org: cache first, capped.
    Only GET over http(s) is ever cached; POSTs, Range requests, tel:/sms: links and every other host pass straight through.
    To refresh everything for every visitor: bump CACHE_VERSION. To switch it off for one browser: open any tour page with ?nosw=1. */
-const CACHE_VERSION = 'rc-tour-v22-datacache-d1793679117';   // 11-02: app rules look, preload, skeletons
+const CACHE_VERSION = 'rc-tour-v23-memo-d1793679479';   // 11-02: app rules look, preload, skeletons
 const SHELL = CACHE_VERSION + '-shell';
 const DATA = CACHE_VERSION + '-data';
 const TILES = CACHE_VERSION + '-tiles';
@@ -19,7 +19,7 @@ const TILE_HOSTS = ['tiles.openfreemap.org'];
 const TILE_MAX = 3000;
 
 const PRECACHE = [
-  'product.html', 'lib/rc-apprules.css', 'lib/rc-frame-pause.js',
+  'product.html', 'lib/rc-apprules.css', 'lib/rc-frame-pause.js', 'lib/rc-fetch-memo.js',
   // screens the shell preloads after Today (APP-RULES 10): Find, SEO, Results
   'c10-find/index.html', 'c8-seo/index.html', 'c9-results/index.html', 'lib/rc-scores.js', 'lib/rc-results.js', 'lib/seo-jackson.json',
   'lib/nimbus-shell.css', 'lib/rc-physical.css', 'lib/rc-features.js', 'lib/nb-react.js', 'lib/rc-state.js', 'lib/rc-roof.js', 'lib/st-meta.js', 'lib/brand.js', 'lib/wing-mascot.js', 'lib/nimbus-shell.js', 'lib/nimbus-assistant.css', 'lib/nimbus-truck.css', 'lib/nimbus-tools.js', 'lib/nimbus-brain.js', 'lib/nimbus-assistant.js', 'lib/nimbus-truck.js', 'lib/nimbus-kb.json', 'lib/nimbus-settings.js', 'lib/nimbus-data.js', 'lib/nimbus-talk.js', 'lib/nimbus-talk.css',
