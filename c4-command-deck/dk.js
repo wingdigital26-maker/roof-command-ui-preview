@@ -335,7 +335,8 @@
   // (paintRoof repaints the band when an outline lands). ?no3d=1 keeps the flat picture.
   function patchHouse3D(w) {
     const no3d = () => { try { w.document.documentElement.classList.add('no3d'); } catch (e) { } };   // the flat drawing shows again (dk.css)
-    if (true || param('no3d') || typeof w.layout !== 'function' || !w.WebGLRenderingContext) { no3d(); return; }
+    if (param('no3d') ||   /* 3D back on the Today card (Jack 11-02); the 11-01 port had switched it off */
+     typeof w.layout !== 'function' || !w.WebGLRenderingContext) { no3d(); return; }
     const here = new URL('house3d.js', DK_SRC || location.href).href;   // next to this file (currentScript is gone by the time the page patches)
     let ctl = null, kicked = false, lastSpec = null, lastId = null, loadedAt = 0;
     const after = (name, fn) => { if (typeof w[name] !== 'function') return; const o = w[name]; w[name] = function () { const r = o.apply(this, arguments); try { fn(); } catch (e) { } return r; }; };

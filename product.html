@@ -181,7 +181,13 @@ window.__frames=frames;     // the nav-time check reads which screens are warm
 /* APP-RULES 10 (Jack 11-02, "make it so this stuff preloads"): after the first screen is usable every other screen loads in the
    background, lightest first, heavy maps last, each on an idle slot after the one before it; frames stay alive and parked
    (rc-frame-pause.js stops their drawing), so a nav click shows the screen at once. Not under the opening: after it. */
-const WARM_ORDER=['daily','seo','results','find','home','storm'];
+/* Jack 11-02 ("why does it keep freezing"): measured with the full queue the JS heap sat at 1.5 GB against 0.34 GB without it,
+   almost all of it the Storms frame (271k homes in deck.gl) drawn hidden. So only the light screens preload; Storms gets its
+   data files warmed into the cache (no frame, no drawing) and its frame on hover over the nav item; a machine with 4 GB or
+   less (navigator.deviceMemory) preloads SEO and Results only. */
+const LOWMEM=!!(navigator.deviceMemory&&navigator.deviceMemory<=4);
+const WARM_ORDER=LOWMEM?['daily','seo','results']:['daily','seo','results','find','home'];
+const STORM_DATA=['lib/st-data-dfw/catalog.json','lib/st-data-dfw/latest-storm.json','lib/st-data-dfw/homes.bin'];
 window.__switch={last:0};   // tab-switch timing for the Playwright check
 
 /* ---- routes ---- */
@@ -318,24 +324,27 @@ function settle(screen){
 let warming=null;   // the screen loading in the background right now
 function warmNext(from){
   if(NOPREFETCH||LOADING.on||warming) return;
-  const next=WARM_ORDER.find(k=>!frames[k]); if(!next) return;
+  const next=WARM_ORDER.find(k=>!frames[k]); if(!next){ warmStormData(); return; }
   /* only the first background screen waits for Today's map (up to 12 s); after that the queue just takes idle slots */
   const mapDone=()=>{ if(warmNext.any) return true; const d=frames.daily; if(!d||!d.loaded) return true; try{ const w=d.el.contentWindow; return !!(w&&w.__mapReady); }catch(e){ return true; } };
   const t0=performance.now();
   const tryIt=()=>{ if(frames[next]){ warming=null; warmNext(); return; } if(!mapDone()&&performance.now()-t0<12000){ setTimeout(tryIt,500); return; }
     idle(()=>{ if(frames[next]){ warming=null; warmNext(); return; } warming=next; warmNext.any=true; const fr=frameFor(next); fr.warm=true; fr.el.dataset.warm='1';
-      /* held like a screen under the opening (opacity 0, never display:none) until its first view has drawn, so a map
-         can size its canvas and finish its first draw off-screen; then it parks (rc-frame-pause stops its drawing) */
-      fr.held=true; fr.el.dataset.hold='1'; load(fr,srcFor(next,{}));
-      const cap=next==='storm'?30000:next==='home'?12000:6000, t1=performance.now();
-      const drawn=()=>{ try{ const w=fr.el.contentWindow; if(!w||!fr.loaded) return false; if(next==='storm'||next==='home') return !!w.__ready; return w.document.readyState==='complete'; }catch(e){ return true; } };
-      const park=()=>{ if(!fr.held) return; fr.held=false; delete fr.el.dataset.hold; if(cur!==next){ fr.el.classList.add('parked'); tell(fr,{type:'visibility',hidden:true}); } };
+      /* never drawn hidden: the frame loads, sizes itself for one short moment, then parks (display:none, rc-frame-pause
+         holds its animation frames and timers) until its tab is opened */
+      load(fr,srcFor(next,{}));
       const done=()=>{ if(warming!==next) return; warming=null; setTimeout(()=>warmNext(),800); };
-      const watch=()=>{ if(!fr.held){ done(); return; } if(drawn()||performance.now()-t1>cap){ setTimeout(park,next==='storm'||next==='home'?800:300); done(); return; } setTimeout(watch,250); };
-      fr.el.addEventListener('load',()=>setTimeout(watch,300),{once:true}); setTimeout(()=>{ if(warming===next){ park(); done(); } },cap+5000);   // a screen that never arrives does not block the rest
+      fr.el.addEventListener('load',()=>{ setTimeout(()=>{ if(cur!==next&&!fr.held){ fr.el.classList.add('parked'); tell(fr,{type:'visibility',hidden:true}); } },600); done(); },{once:true});
+      setTimeout(done,15000);   // a screen that never arrives does not block the rest
     }); };
   tryIt();
 }
+/* Storms: its data files go into the browser (and, hosted, the service worker) cache at idle, so the first open skips the
+   download; the frame itself is made only on hover or focus of the Storms nav item, or on the click */
+let stormData=false;
+function warmStormData(){ if(stormData||LOWMEM||NOPREFETCH) return; stormData=true; idle(()=>{ STORM_DATA.forEach((u,i)=>setTimeout(()=>{ fetch(u,{cache:'force-cache',priority:'low'}).then(r=>r.ok&&r.arrayBuffer()).catch(()=>{}); },i*1500)); }); }
+function warmOnHover(screen){ if(NOPREFETCH||LOWMEM||frames[screen]||warming||LOADING.on) return; warming=screen; const fr=frameFor(screen); load(fr,srcFor(screen,{}));
+  fr.el.addEventListener('load',()=>{ warming=null; setTimeout(()=>{ if(cur!==screen&&!fr.held){ fr.el.classList.add('parked'); tell(fr,{type:'visibility',hidden:true}); } },600); },{once:true}); setTimeout(()=>{ if(warming===screen) warming=null; },15000); }
 /* the skeleton: shown over the stage while the current screen has no painted content; hidden the moment it has */
 const skel=document.getElementById('skel');
 const SKEL={today:'<i class="t h"></i><i class="t s"></i><div class="r r1"><i class="d"></i><i></i></div><div class="r r2"><i></i><i></i><i></i><i></i></div><div class="r r3"><i></i><i></i><i></i></div>',
@@ -442,7 +451,9 @@ addEventListener('message',e=>{ if(e.origin!==location.origin) return; const d=e
 });
 
 const narrow=matchMedia('(max-width:599px)');
-ORDER.forEach(id=>{const b=document.createElement('button');b.dataset.screen=id;b.textContent=screens[id].label;b.onclick=()=>go(id,{});nav.appendChild(b)});
+ORDER.forEach(id=>{const b=document.createElement('button');b.dataset.screen=id;b.textContent=screens[id].label;b.onclick=()=>go(id,{});
+  if(id==='storm'){ b.addEventListener('pointerenter',()=>warmOnHover(id)); b.addEventListener('focus',()=>warmOnHover(id)); }   // the heavy map warms only when the hand is on its tab
+  nav.appendChild(b)});
 narrow.addEventListener('change',()=>setTimeout(Nimbus.place,50));
 /* ?mode=phone: a phone-sized stage inside a desktop window (capture tooling only; no toggle in the app) */
 function setMode(phone){main.classList.toggle('phone',phone);document.body.classList.toggle('nb-phone',phone);setTimeout(Nimbus.place,320);}

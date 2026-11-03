@@ -207,12 +207,15 @@ html[data-rc="today"] .ov-f span{overflow:hidden;text-overflow:ellipsis;min-widt
 /* the working deck (list, home card, map) sits under the overview at a fixed working height */
 html[data-rc="today"] .app .main{height:clamp(560px,calc(100vh - 80px),820px);flex:none;padding:var(--a-sect) var(--a-pad) var(--a-pad);gap:var(--a-gap);max-width:none;width:100%;grid-template-columns:288px minmax(400px,480px) minmax(0,1fr)}   /* the map takes every spare pixel on the right (Jack 11-02) */
 /* the list head: tabs on one row, the count on its own line under them so "50 left today" is never cut */
-html[data-rc="today"] :is(.app,.sheet) .qh{flex-wrap:wrap;row-gap:4px}
-html[data-rc="today"] :is(.app,.sheet) .qh small{white-space:nowrap}
-@media (max-width:1100px){ html[data-rc="today"] .app .qh small{flex:0 0 100%;order:9;padding-left:4px} }
+/* Jack 11-02 ("fix this as well"): tabs and the count on ONE line, a normal 40px search box with even margins, the same
+   spacing to the first row at every width; the list card's top stays level with the house card (grid, align stretch) */
+html[data-rc="today"] :is(.app,.sheet) .qh{display:flex;flex:none;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:8px;padding:16px 16px 10px;min-height:0}   /* flex:none: the list pane is a flex column and was crushing the head and the search box */
+html[data-rc="today"] :is(.app,.sheet) .qh small{white-space:nowrap;flex:none;margin:0}
+html[data-rc="today"].embed .queue .find{flex:none;display:flex;align-items:center;height:40px;margin:0 16px 10px;padding:0 14px;border-radius:var(--a-r-pill);border:0;background:var(--a-canvas);box-shadow:none}
+html[data-rc="today"].embed .queue .find input{font-size:var(--a-13);height:40px}
+@media (max-width:1100px){ html[data-rc="today"] .app .qh{padding:14px 12px 8px} html[data-rc="today"] .app .ltabs button{padding:0 10px} html[data-rc="today"].embed .app .queue .find{margin:0 12px 10px} }
 html[data-rc="today"] :is(.app,.sheet) .queue,html[data-rc="today"] :is(.app,.sheet) .mapwrap,html[data-rc="today"] :is(.app,.sheet) .card.paper{border:0;border-radius:var(--a-r);box-shadow:none;background:#fff}
 html[data-rc="today"] :is(.app,.sheet) .ph{border-radius:var(--a-r) var(--a-r) 0 0}
-html[data-rc="today"] :is(.app,.sheet) .qh{padding:20px var(--a-pad) 8px}
 html[data-rc="today"] :is(.app,.sheet) .ltabs button{font-size:var(--a-13);height:32px;border-radius:var(--a-r-pill);padding:0 14px}
 html[data-rc="today"] :is(.app,.sheet) .ltabs button.on,html[data-rc="today"] :is(.app,.sheet) .ltabs button[aria-selected="true"]{background:var(--a-dark);color:#fff;box-shadow:none}
 html[data-rc="today"] :is(.app,.sheet) .ltabs button i{border-radius:var(--a-r-pill)}
@@ -223,7 +226,6 @@ html[data-rc="today"] :is(.app,.sheet) .qrow .ad{font-size:var(--a-13)}
 html[data-rc="today"] :is(.app,.sheet) .qrow .mt{font-size:var(--a-12)}
 html[data-rc="today"] :is(.app,.sheet) .qrow .hz{font-size:var(--a-12);color:var(--a-ink)}
 html[data-rc="today"] :is(.app,.sheet) .qrow:hover,html[data-rc="today"] :is(.app,.sheet) .qrow.on{background:#eef3ff;box-shadow:inset 2px 0 0 var(--a-blue)}
-html[data-rc="today"] .embed .queue .find{border-radius:var(--a-r-pill);border:0;background:var(--a-canvas);margin:0 16px 8px}
 html[data-rc="today"] .qfoot{font-size:var(--a-12);border-top:1px solid var(--a-hair)}
 /* the home card */
 html[data-rc="today"] .addr h2{font-size:var(--a-22);line-height:var(--a-lh22);font-weight:600;letter-spacing:-.02em}
@@ -531,6 +533,12 @@ html[data-rc="crm"] #crm .cvt b{font-size:15px!important;line-height:22px!import
 html[data-rc="crm"] #crm .cvt small{font-size:12px!important;line-height:16px!important}
 html[data-rc="crm"] #crm .cvh .cstage select{max-width:140px;height:36px}
 html[data-rc="crm"] #crm .cico,html[data-rc="crm"] #crm .cmenu summary{width:36px;height:36px;padding:0;margin:0;max-width:none}
+/* under 1200px frames (a 1280 window) the thread column is ~370px: the stage select and the house toggle leave the header
+   (the pane's own Stage row takes over, and the pane has Hide panel), so the address keeps its full line */
+@media (max-width:1200px) and (min-width:641px){
+  html[data-rc="crm"] #crm .cvh .cstage,html[data-rc="crm"] #crm .cvh .cico.house{display:none!important}
+  html[data-rc="crm"] #crm .ch .cstg-row{display:flex!important}
+}
 /* the home pane while a thread is open: the house from above (the 3D stage went with the 11-01 port, which left the pane empty) */
 html[data-rc="crm"] #crm .cphoto{position:relative;margin:0 0 14px;border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:#e8eaee}
 html[data-rc="crm"] #crm .cphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
