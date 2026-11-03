@@ -219,6 +219,7 @@ html[data-rc="today"] :is(.app,.sheet) .ph{border-radius:var(--a-r) var(--a-r) 0
 html[data-rc="today"] :is(.app,.sheet) .ltabs button{font-size:var(--a-13);height:32px;border-radius:var(--a-r-pill);padding:0 14px}
 html[data-rc="today"] :is(.app,.sheet) .ltabs button.on,html[data-rc="today"] :is(.app,.sheet) .ltabs button[aria-selected="true"]{background:var(--a-dark);color:#fff;box-shadow:none}
 html[data-rc="today"] :is(.app,.sheet) .ltabs button i{border-radius:var(--a-r-pill)}
+html[data-rc="today"] :is(.app,.sheet) .ltabs button::after{display:none}
 html[data-rc="today"] :is(.app,.sheet) .qh small{font-size:var(--a-12);letter-spacing:0;text-transform:none}
 html[data-rc="today"] :is(.app,.sheet) .qrow{padding:8px var(--a-pad) 8px 16px;border-bottom:1px solid var(--a-hair-2)}
 html[data-rc="today"] :is(.app,.sheet) .qrow .no{border-radius:50%;font-size:var(--a-12);border-color:var(--a-hair)}
