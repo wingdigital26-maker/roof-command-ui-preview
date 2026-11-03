@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Roof Command</title>
 <script src="../lib/rc-frame-pause.js"></script><!-- parked by the shell = no drawing -->
-<link rel="modulepreload" href="home.js">
 <link rel="stylesheet" href="home.css">
 <link rel="stylesheet" href="crm.css">
 <link rel="stylesheet" href="cal.css"><!-- the built-in calendar view (cal.js) -->
@@ -218,7 +217,8 @@ try { const q = new URLSearchParams(location.search), v = q.get('view'); documen
 <script src="../lib/rc-features.js"></script><!-- kept features switchboard (10-11) -->
 <script src="features.js"></script><!-- roof-build stamp, odometer counts -->
 <script src="house.js"></script>
-<script type="module" src="home.js"></script><!-- the 3D roof (three.js) for the inbox home pane, 3D by default with Satellite one click away (Jack 11-02); the house page keeps its satellite hero (house.css hides #stage there) --><!-- the house page: satellite photo + facts on file, no 3D or estimated roof (Jack 11-01) -->
+<script>/* the 3D roof (three.js, 0.7 MB + the model) loads after the first paint, on an idle slot; the pane shows the satellite photo until the model has drawn (Jack 11-02, load time) */
+addEventListener('load',()=>{ (window.requestIdleCallback||setTimeout)(()=>{ import('./home.js').catch(()=>{}); },{timeout:3000}); });</script><!-- the 3D roof (three.js) for the inbox home pane, 3D by default with Satellite one click away (Jack 11-02); the house page keeps its satellite hero (house.css hides #stage there) --><!-- the house page: satellite photo + facts on file, no 3D or estimated roof (Jack 11-01) -->
 <script>/* plain words on every CRM screen (Jack 10-26); Home facts and the measurements tab keep their detail */ if (window.RCPLAIN) RCPLAIN.watch(document.body);</script>
 </body>
 </html>

@@ -696,7 +696,7 @@ label.dlab{display:block}
 <script src="../lib/brand.js"></script>
 <script src="../lib/rc-copy.js"></script>
 <script src="../lib/rc-proof.js"></script><!-- Proof Page: Send proof page from the card (Bet 3, 10-23) -->
-<script src="../lib/st-homes.js"></script>
+<!-- st-homes.js (and its 2.4 MB homes.bin) no longer load before first paint: the map pulls them in after it is ready (Jack 11-02, load time) -->
 <script src="../lib/rc-queue.js"></script>
 <!-- the 2 MB of map libraries download now but run only after the list is on screen (MAPLIBS below) -->
 <link rel="preload" as="script" href="../vendor/maplibre-gl@4.7.1/maplibre-gl.js">
@@ -1605,7 +1605,10 @@ function startMap(){
     map.on('load',()=>{
       restyle();
       if (window.deck){ overlay = new window.deck.MapboxOverlay({ interleaved:true, layers:[], getCursor:({isDragging,isHovering})=>isDragging?'grabbing':isHovering?'pointer':'grab' });   /* a house under the cursor = pointer: every house is a click */ map.addControl(overlay); }
-      if (window.STH) STH.ready.then(()=>{ buildBulk(); fpRedraw(); refreshFp(); }).catch(()=>{});
+      // the 271k background dots: st-homes.js + homes.bin arrive after the first view has drawn, on an idle slot
+      const bulkLater=()=>{ const go=()=>{ if(window.STH){ STH.ready.then(()=>{ buildBulk(); fpRedraw(); refreshFp(); }).catch(()=>{}); return; } const sc=document.createElement('script'); sc.src='../lib/st-homes.js'; sc.onload=go; document.head.appendChild(sc); };
+        (window.requestIdleCallback||setTimeout)(go,{timeout:2500}); };
+      setTimeout(bulkLater, 1200);
       RC.on(d=>{ if (d.key==='att' || d.key==='pipe') fpRedraw(); });
       map.resize(); fitAll(true); setTimeout(()=>{map.resize(); fitAll(true);},300);
       document.querySelectorAll('.maplibregl-ctrl-attrib').forEach(a=>a.classList.remove('maplibregl-compact-show'));

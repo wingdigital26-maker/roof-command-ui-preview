@@ -548,9 +548,10 @@ html[data-rc="crm"] #crm .cseg button[aria-pressed="true"]{background:var(--a-da
 html[data-rc="crm"] #crm .chstage{display:block;padding:0 14px 0}
 html[data-rc="crm"] #chstage .stage{height:220px;border-radius:16px;border:0;background:var(--a-canvas)}
 html[data-rc="crm"] #chstage .title{display:none!important}   /* the model only: no estimated squares badge (Jack 11-01, no made-up measurements) */
-html[data-rc="crm"] #ch .cphoto{display:none}
-html[data-rc="crm"] #ch[data-cv="sat"] .cphoto,html[data-rc="crm"] #ch:has(#chstage .stage.none) .cphoto,html[data-rc="crm"] #ch:not(:has(#chstage .stage)) .cphoto{display:block}
-html[data-rc="crm"] #ch[data-cv="sat"] .chstage,html[data-rc="crm"] #ch:has(#chstage .stage.none) .chstage{display:none}
+html[data-rc="crm"] #ch .cphoto{display:block}   /* the poster until the model has drawn */
+html[data-rc="crm"] #ch .chstage{display:none}
+html[data-rc="crm"] #ch[data-d3="on"]:not([data-cv="sat"]):not(:has(#chstage .stage.none)) .chstage{display:block}
+html[data-rc="crm"] #ch[data-d3="on"]:not([data-cv="sat"]):not(:has(#chstage .stage.none)) .cphoto{display:none}
 /* (older note) the house from above (the 3D stage went with the 11-01 port, which left the pane empty) */
 html[data-rc="crm"] #crm .cphoto{position:relative;margin:0 0 14px;border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:#e8eaee}
 html[data-rc="crm"] #crm .cphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}

@@ -11,7 +11,7 @@
    - Basemap tiles, glyphs and sprites from tiles.openfreemap.org: cache first, capped.
    Only GET over http(s) is ever cached; POSTs, Range requests, tel:/sms: links and every other host pass straight through.
    To refresh everything for every visitor: bump CACHE_VERSION. To switch it off for one browser: open any tour page with ?nosw=1. */
-const CACHE_VERSION = 'rc-tour-v20-apprules-r7-d1793677347';   // 11-02: app rules look, preload, skeletons
+const CACHE_VERSION = 'rc-tour-v21-load-d1793678559';   // 11-02: app rules look, preload, skeletons
 const SHELL = CACHE_VERSION + '-shell';
 const DATA = CACHE_VERSION + '-data';
 const TILES = CACHE_VERSION + '-tiles';
@@ -29,7 +29,7 @@ const PRECACHE = [
   'c4-command-deck/fonts/montserrat-400.woff2', 'c4-command-deck/fonts/montserrat-500.woff2', 'c4-command-deck/fonts/montserrat-600.woff2', 'c4-command-deck/fonts/montserrat-700.woff2', 'c4-command-deck/fonts/ibm-plex-mono-400-latin.woff2',
   'vendor/maplibre-gl@4.7.1/maplibre-gl.js', 'vendor/maplibre-gl@4.7.1/maplibre-gl.css',
   // Storm map (the 4 MB homes file is cached the first time the Storm map opens, not here)
-  '1b-storm-theater.html', 'lib/st-common.css', 'lib/st-homes.js', 'lib/st-storm.js', 'lib/st-map.js', 'lib/st-replay.js', 'lib/st-data-dfw/catalog.json',
+  '1b-storm-theater.html', 'lib/st-common.css', 'lib/st-homes.js', 'lib/st-storm.js', 'lib/st-map.js', 'lib/st-replay.js', 'lib/st-data-dfw/catalog.json', 'lib/st-data-dfw/meta/overview.json',
   'vendor/deck.gl@9.0.38/dist.min.js',
   // Home
   'c5-home/index.html', 'c5-home/home.css', 'c5-home/features.css', 'c5-home/features.js', 'c5-home/rec.js', 'c5-home/home.js',

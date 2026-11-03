@@ -332,6 +332,8 @@
     if (chf.__h !== facts) { chf.innerHTML = facts; chf.__h = facts; panePhoto(chf.querySelector('.cphoto')); }
   }
   let paneView = '3d';   // 3D model by default (Jack 11-02), never remembered; the photo shows on its own when the home has no model (.stage.none)
+  // until the deferred three.js model has drawn its first frames (home.js sets __ready), the pane shows the satellite photo as the poster
+  (function d3watch(){ const ch = $('#ch'); if (ch && window.__ready) { ch.dataset.d3 = 'on'; return; } setTimeout(d3watch, 300); })();
   document.addEventListener('click', e => { const b = e.target.closest('#ch .cseg [data-cv]'); if (!b) return; paneView = b.dataset.cv; $('#ch').dataset.cv = paneView; document.querySelectorAll('#ch .cseg button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.cv === paneView))); if (paneView === '3d') requestAnimationFrame(() => { if (window.__refit) window.__refit(); }); });
   // the pane's satellite photo: about 40 m across at the home's county position, one request per home, kept while the page lives
   const PHOTO = new Map();
