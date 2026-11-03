@@ -118,8 +118,6 @@ html[data-rc] body[data-screen="daily"]>header .wstorm{display:none}
 /* six tabs since Find (10-26): tighter tabs on a phone so Results still fits at 375 */
 @media (max-width:480px){ html[data-rc] body>header nav button{padding:5px 8px;font-size:14px} }
 </style>
-<style>.rc-prop{flex:none;height:32px;display:inline-flex;align-items:center;padding:0 12px;border-radius:6px;background:#fff;border:1px solid #D5D9E0;color:#0B1020;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}.rc-prop:hover{background:#F1F5FA;border-color:#0D6C99;color:#0D6C99}.rc-prop .ps{display:none}header{transition:opacity .5s ease}html.rc-opening header{opacity:0;pointer-events:none}@media (max-width:899px){.rc-prop{order:2;height:44px;padding:0 14px}}@media (max-width:599px){.rc-prop .pl{display:none}.rc-prop .ps{display:inline}}@media (max-width:430px){header .co>div{display:none}}</style>
-<script>(function(){var d=document.documentElement;function f(){var seen=false;try{seen=!!sessionStorage.getItem('rc.introSeen')}catch(e){}var h=location.hash;d.classList.toggle('rc-opening',/^#\/opening\/?$/.test(h)||(!h&&!seen&&!/[?&]nointro=1/.test(location.search)))}f();addEventListener('hashchange',f);setInterval(f,250)})()</script>
 </head>
 <body>
 <header>
@@ -129,7 +127,6 @@ html[data-rc] body[data-screen="daily"]>header .wstorm{display:none}
   <nav id="nav" aria-label="Screens"></nav>
   <button type="button" class="wstorm" id="wstorm" hidden></button><!-- the ONE place the working storm is named for every screen (RC.SHOWCASE) -->
   <span class="sp"></span>
-  <a class="rc-prop" href="proposal.html" target="_blank" rel="noopener"><span class="pl">See the proposal</span><span class="ps">Proposal</span></a>
   <label class="find" id="find" title="Find an address or storm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="findIn" type="search" placeholder="Find an address or storm" autocomplete="off" aria-label="Find an address or ask Nimbus"></label>
   <div class="sig">Powered by <svg viewBox="0 0 63 66" aria-hidden="true"><path fill="#2757E6" d="M 0 3 Q 0 0 3 0 L 27 0 Q 30.5 0 30.5 3.5 L 30.5 28.5 Q 30.5 33.5 35.5 33.5 L 60 33.5 Q 63 33.5 63 36.5 L 63 63 Q 63 66 60 66 L 36 66 Q 32.5 66 32.5 62.5 L 32.5 37.5 Q 32.5 32.5 27.5 32.5 L 3 32.5 Q 0 32.5 0 29.5 Z"/></svg><b>Wing Digital</b></div>
   <div class="sb-user"><div class="me" id="me" title="" tabindex="0"></div><div class="sb-who"><b id="sbName"></b><small id="sbRole">Account and setup</small></div></div>

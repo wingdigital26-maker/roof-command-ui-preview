@@ -133,7 +133,7 @@
   let VIEW = 'inbox', SEL = null, MSG = null, filter = 'all', stageF = '', q = '', chan = 'auto', replying = false, hold = false, warmed = false, qrKind = null;
   const sugg = {};
   try { const f = localStorage.getItem(FK); if (FILTERS.some(x => x[0] === f)) filter = f; } catch (e) { }
-  try { if (localStorage.getItem(HK) === 'off') document.getElementById('crm').dataset.home = 'off'; } catch (e) { }
+  try { localStorage.removeItem(HK); } catch (e) { }   // Jack 11-02: the house panel always stays (Hide panel flipped the layout); an old 'off' choice is forgotten
   const crm = $('#crm'), clist = $('#clist'), cfil = $('#cfil'), cq = $('#cq'), clN = $('#clN'), cvh = $('#cvh'), cvm = $('#cvm'), cvf = $('#cvf'), chh = $('#chh'), chf = $('#chf'), chstage = $('#chstage'), vtabs = $('#vtabs');
   const curId = () => (window.HOME && window.HOME.rawId) || null;
 
@@ -307,14 +307,15 @@
     if (!id) { const e = `<div class="cempty"><span class="ic">${ICON.roof}</span><b>The house shows here</b><p>Pick a thread and the home's roof, hail, roof record and stage follow.</p></div>`; if (chh.__h !== '') { chh.innerHTML = ''; chh.__h = ''; } if (chf.__h !== e) { chf.innerHTML = e; chf.__h = e; } return; }
     const h = homeOf(id), H = window.HOME, mine = !!(H && H.rawId === id), st = RC.stage(id), idx = RC.STAGES.findIndex(s => s[0] === st), b = RC.booking(id), arch = (RC.pipeline()[id] || {}).archived;
     const head = `<button type="button" class="cback" data-a="tothread" aria-label="Back to the conversation"><span class="ic">${ICON.back}</span></button><div class="cvt"><b>${esc(h.addr)}</b><small>${esc([h.place || [h.city, h.zip].filter(Boolean).join(' '), h.subdivision].filter(Boolean).join(' · '))}</small></div>` +
-      `<button type="button" class="cico" data-a="house" aria-label="Hide the home" title="Hide the home"><span class="ic">${ICON.close}</span></button>`;
+      ``;   // Jack 11-02: no close button on the pane; it stays
     if (chh.__h !== head) { chh.innerHTML = head; chh.__h = head; }
     const roof = h.roofAge || (h.year ? 'Built ' + h.year : mine ? 'Checking the county record' : 'Not on file');
     // re-roof line only where the city's permit list is complete (McKinney, Allen: lib/st-meta.js reroof), else nothing
     const rr = mine && H.rec && H.rec.reroof, permit = rr ? (rr.none ? 'No re-roof permit since ' + rr.since : (rr.done ? 'Re-roofed ' : 'Re-roof permit ') + rr.date) : '';
     const strip = RC.STAGES.map((s, i) => `<button type="button" class="cst${i < idx ? ' dn' : ''}${i === idx && !arch ? ' on' : ''}" data-s="${s[0]}" aria-current="${i === idx ? 'step' : 'false'}"><span class="d">${i < idx ? ICON.check : i + 1}</span><b>${esc(s[1])}</b></button>`).join('');
     // 10-17: the few facts a roofer needs while texting (hail, roof), Book, then the rest behind More
-    const facts = (h.gi != null && window.RCIMG && window.STM ? `<figure class="cphoto" data-gi="${h.gi}" aria-label="Satellite photo of ${esc(h.addr)}"><span class="tag">This house</span></figure>` : '') +   // 11-02: the house from above (lib/rc-imagery.js, Esri live, NAIP fallback, credit shown)
+    const facts = `<div class="cseg" role="group" aria-label="House picture"><button type="button" data-cv="3d" aria-pressed="${paneView === '3d'}">3D</button><button type="button" data-cv="sat" aria-pressed="${paneView === 'sat'}">Satellite</button></div>` +   // Jack 11-02: the 3D model first, like Today; Satellite one click away
+      (h.gi != null && window.RCIMG && window.STM ? `<figure class="cphoto" data-gi="${h.gi}" aria-label="Satellite photo of ${esc(h.addr)}"><span class="tag">This house</span></figure>` : '') +   // 11-02: the house from above (lib/rc-imagery.js, Esri live, NAIP fallback, credit shown)
       `<div class="cstg-row"><span>Stage</span>${stageSelect(id)}</div><div class="ckpi">` +   // the stage row shows on the phone sheet, where the thread header has no room for it
       `<div><span>Hail</span>${h.hail != null ? `<b>${h.hail.toFixed(2)} in</b><small>${esc(h.hailDate)}</small>` : '<b class="sm">Not on file</b>'}</div>` +
       `<div><span>Roof</span>${h.year ? `<b>${esc(String(h.year))}</b><small>${esc(permit)}</small>` : `<b class="sm">${esc(roof)}</b><small>${esc(permit)}</small>`}</div>` +
@@ -330,6 +331,8 @@
       `<button type="button" class="cbtn wide" data-a="record"><span class="ic">${ICON.roof}</span>Open the home record</button></details>`;
     if (chf.__h !== facts) { chf.innerHTML = facts; chf.__h = facts; panePhoto(chf.querySelector('.cphoto')); }
   }
+  let paneView = '3d';   // 3D model by default (Jack 11-02), never remembered; the photo shows on its own when the home has no model (.stage.none)
+  document.addEventListener('click', e => { const b = e.target.closest('#ch .cseg [data-cv]'); if (!b) return; paneView = b.dataset.cv; $('#ch').dataset.cv = paneView; document.querySelectorAll('#ch .cseg button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.cv === paneView))); if (paneView === '3d') requestAnimationFrame(() => { if (window.__refit) window.__refit(); }); });
   // the pane's satellite photo: about 40 m across at the home's county position, one request per home, kept while the page lives
   const PHOTO = new Map();
   function panePhoto(fig) {
@@ -506,10 +509,7 @@
 }
 #crm .chide .ic,#crm .chshow .ic{width:15px;height:15px}`;
     document.head.appendChild(st);
-    const hide = document.createElement('button'); hide.type = 'button'; hide.className = 'chide'; hide.innerHTML = 'Hide panel <span aria-hidden="true">&rsaquo;</span>'; hide.setAttribute('aria-label', 'Hide the house panel');
-    const show = document.createElement('button'); show.type = 'button'; show.className = 'chshow'; show.innerHTML = '<span aria-hidden="true">&lsaquo;</span> Show house'; show.setAttribute('aria-label', 'Show the house panel');
-    hide.onclick = show.onclick = toggleHomePane;
-    $('#ch').appendChild(hide); $('#cv').appendChild(show);
+    // Jack 11-02: no Hide panel / Show house buttons; the panel stays put (toggleHomePane is kept for the header icon only)
   }
   chf.addEventListener('toggle', e => { if (e.target.classList.contains('cmore')) chf.__more = e.target.open; }, true);   // More stays open across repaints
   // the header's More menu closes on a click elsewhere or Escape

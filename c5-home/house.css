@@ -5,7 +5,7 @@
 
 /* the old record (3D roof, measurement tabs, stage strip) is gone from view; its buttons stay in the page for rec.js */
 body.house-on[data-view="home"] .rh,body.house-on[data-view="home"] #steps,body.house-on[data-view="home"] main.main,body.house-on[data-view="home"] .stick{display:none!important}
-#stage,.chstage{display:none!important}
+body[data-view="home"] #stage,body[data-view="home"] .chstage{display:none!important}   /* the house page has no 3D; the inbox pane keeps the model (Jack 11-02) */
 #house{display:none}
 body.house-on[data-view="home"] #house{display:block}
 

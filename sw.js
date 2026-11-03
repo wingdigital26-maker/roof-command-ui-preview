@@ -11,7 +11,7 @@
    - Basemap tiles, glyphs and sprites from tiles.openfreemap.org: cache first, capped.
    Only GET over http(s) is ever cached; POSTs, Range requests, tel:/sms: links and every other host pass straight through.
    To refresh everything for every visitor: bump CACHE_VERSION. To switch it off for one browser: open any tour page with ?nosw=1. */
-const CACHE_VERSION = 'rc-tour-v20-apprules-r7-d1793673591';   // 11-02: app rules look, preload, skeletons
+const CACHE_VERSION = 'rc-tour-v20-apprules-r7-d1793676988';   // 11-02: app rules look, preload, skeletons
 const SHELL = CACHE_VERSION + '-shell';
 const DATA = CACHE_VERSION + '-data';
 const TILES = CACHE_VERSION + '-tiles';

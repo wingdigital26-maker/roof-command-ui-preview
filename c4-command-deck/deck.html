@@ -1386,7 +1386,7 @@ function bulkLayers(){
   const L = [ new window.deck.ScatterplotLayer({ id:'homes-all', beforeId:labelId, data:{ length:BULK.nAll, attributes:{ getPosition:{ value:BULK.all, size:2 } } },
     radiusUnits:'meters', getRadius:7, radiusMinPixels:phone?.7:1, radiusMaxPixels:2.2, getFillColor:[128,136,152,phone?40:52], stroked:false, pickable:false, antialiasing:false }) ];
   if (BULK.hit && BULK.nHit) L.push(new window.deck.ScatterplotLayer({ id:'homes-hit', beforeId:labelId, data:{ length:BULK.nHit, attributes:{ getPosition:{ value:BULK.hit, size:2 } } },
-    radiusUnits:'meters', getRadius:9, radiusMinPixels:phone?1.1:1.5, radiusMaxPixels:3.4, getFillColor:[98,108,128,phone?78:92], stroked:false, pickable:false, antialiasing:true }));
+    radiusUnits:'meters', getRadius:9, radiusMinPixels:phone?1.1:1.5, radiusMaxPixels:3.4, getFillColor:[98,108,128,phone?78:92], stroked:false, pickable:false, antialiasing:false }));
   return L;
 }
 function fpLayers(){
@@ -1601,7 +1601,7 @@ const want = DK.param('id'), wantN = +DK.param('n',0);
 function startMap(){
   try{
     const a = aerial(), c = (HOMES[cur] && HOMES[cur].loc) || hqLoc();
-    map = new maplibregl.Map({container:'map',style:LIGHT,antialias:false,fadeDuration:0,pixelRatio:Math.min(window.devicePixelRatio||1,1.5),center:c,zoom:12,pitch:a.pitch,bearing:a.bearing,maxPitch:76,attributionControl:{compact:true},interactive:true});
+    map = new maplibregl.Map({container:'map',style:LIGHT,antialias:false,fadeDuration:0,pixelRatio:Math.min(window.devicePixelRatio||1,1.25),center:c,zoom:12,pitch:a.pitch,bearing:a.bearing,maxPitch:76,attributionControl:{compact:true},interactive:true}); window.__map=map;
     map.on('load',()=>{
       restyle();
       if (window.deck){ overlay = new window.deck.MapboxOverlay({ interleaved:true, layers:[], getCursor:({isDragging,isHovering})=>isDragging?'grabbing':isHovering?'pointer':'grab' });   /* a house under the cursor = pointer: every house is a click */ map.addControl(overlay); }

@@ -539,7 +539,18 @@ html[data-rc="crm"] #crm .cico,html[data-rc="crm"] #crm .cmenu summary{width:36p
   html[data-rc="crm"] #crm .cvh .cstage,html[data-rc="crm"] #crm .cvh .cico.house{display:none!important}
   html[data-rc="crm"] #crm .ch .cstg-row{display:flex!important}
 }
-/* the home pane while a thread is open: the house from above (the 3D stage went with the 11-01 port, which left the pane empty) */
+/* the home pane while a thread is open: 3D model first (home.js #stage moved into .chstage), Satellite one click away; a home
+   with no model (.stage.none) shows the photo on its own */
+html[data-rc="crm"] #crm .cseg{display:inline-flex;gap:2px;padding:2px;border-radius:999px;background:var(--a-canvas);margin:0 0 10px}
+html[data-rc="crm"] #crm .cseg button{font:500 12px/16px var(--a-font);border:0;background:none;color:var(--a-muted);min-height:28px;padding:0 12px;border-radius:999px;cursor:pointer}
+html[data-rc="crm"] #crm .cseg button[aria-pressed="true"]{background:var(--a-dark,#111318);color:#fff}
+html[data-rc="crm"] #crm .chstage{display:block;padding:0 14px 0}
+html[data-rc="crm"] #chstage .stage{height:220px;border-radius:16px;border:0;background:var(--a-canvas)}
+html[data-rc="crm"] #chstage .title{display:none!important}   /* the model only: no estimated squares badge (Jack 11-01, no made-up measurements) */
+html[data-rc="crm"] #ch .cphoto{display:none}
+html[data-rc="crm"] #ch[data-cv="sat"] .cphoto,html[data-rc="crm"] #ch:has(#chstage .stage.none) .cphoto,html[data-rc="crm"] #ch:not(:has(#chstage .stage)) .cphoto{display:block}
+html[data-rc="crm"] #ch[data-cv="sat"] .chstage,html[data-rc="crm"] #ch:has(#chstage .stage.none) .chstage{display:none}
+/* (older note) the house from above (the 3D stage went with the 11-01 port, which left the pane empty) */
 html[data-rc="crm"] #crm .cphoto{position:relative;margin:0 0 14px;border-radius:16px;overflow:hidden;aspect-ratio:16/10;background:#e8eaee}
 html[data-rc="crm"] #crm .cphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 html[data-rc="crm"] #crm .cphoto .cr{position:absolute;right:8px;bottom:6px;max-width:70%;font-size:9.5px;line-height:1.25;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.85);text-align:right}
